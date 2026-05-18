@@ -1,0 +1,43 @@
+name : FASTapi CI/CD
+on:
+push:
+
+ jobs:
+    test:
+         runs-on: ubuntu-latest
+         steps:
+             -name: Checkout repository
+                 uses: action/checkout@v4
+          
+             -name: Setup Python
+                 uses: action/python@v5
+        
+             with:
+                 python-version : "3.10"
+
+             -name: set dependencies
+                 run: pip install -r requirements.txt
+                     pip install flake8
+
+             -name: run flake8
+                 run: flake8 main.py
+
+     delivery:
+         runs-on: ubuntu-latest
+         needs: test
+
+         steps:
+            -name: Checkout repository
+            uses: action/checkou@v4
+            -name: Build Docker image
+            run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/pythom-api-devops:latest .
+            -name: login DockerHub
+            uses: docker/login-action@v3
+             with:
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_PASSWORD }}
+            -name: Push Docker image
+            run: docker push ${{ secrets.DOCKERHUB_USERNAME}}/python-api-devops:latest
+
+            
+         
